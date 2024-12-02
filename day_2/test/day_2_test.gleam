@@ -91,3 +91,23 @@ pub fn is_report_safe_test() {
   day_2.is_report_safe([1, 3, 6, 7, 9])
   |> should.be_true()
 }
+
+pub fn some_combination_safe_test() {
+  day_2.some_combination_safe([7, 6, 4, 2, 1])
+  |> should.be_true()
+
+  day_2.some_combination_safe([1, 2, 7, 8, 9])
+  |> should.be_false()
+
+  day_2.some_combination_safe([9, 7, 6, 2, 1])
+  |> should.be_false()
+
+  day_2.some_combination_safe([1, 3, 2, 4, 5])
+  |> should.be_true()
+
+  day_2.some_combination_safe([8, 6, 4, 4, 1])
+  |> should.be_true()
+
+  day_2.some_combination_safe([1, 3, 6, 7, 9])
+  |> should.be_true()
+}

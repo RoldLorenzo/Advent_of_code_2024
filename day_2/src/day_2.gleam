@@ -110,6 +110,14 @@ pub fn is_report_safe(report: List(Int)) -> Bool {
   && differences_of(report, 1, 3)
 }
 
+pub fn some_combination_safe(report: List(Int)) -> Bool {
+  is_report_safe(report)
+  || list.any(
+    list.combinations(report, list.length(report) - 1),
+    is_report_safe,
+  )
+}
+
 pub fn main() {
   let path = get_path_from_arguments()
   let input = read_from_file(path)
@@ -123,4 +131,10 @@ pub fn main() {
   io.debug(amnt_safe_reports)
 
   io.println("")
+
+  let safe_reports = list.map(reports, some_combination_safe)
+  let amnt_safe_reports = list.count(safe_reports, fn(bool) { bool })
+
+  io.println("--- Part Two ---")
+  io.debug(amnt_safe_reports)
 }

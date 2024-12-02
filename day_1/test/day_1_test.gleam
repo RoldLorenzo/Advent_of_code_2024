@@ -22,3 +22,11 @@ pub fn get_similarity_score_test() {
   day_1.get_similarity_score([1, 2, 3, 3, 3, 4], [3, 3, 3, 4, 5, 9])
   |> should.equal(31)
 }
+
+pub fn count_appearances_test() {
+  day_1.count_appearances(3, [1, 2, 3, 3, 3, 4])
+  |> should.equal(3)
+
+  day_1.count_appearances(5, [1, 2, 3, 3, 3, 4])
+  |> should.equal(0)
+}

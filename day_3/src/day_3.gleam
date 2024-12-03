@@ -58,7 +58,7 @@ pub fn expect(input: String, expected: String) -> Result(String, Nil) {
   }
 }
 
-pub fn expect_args(input: String) -> Result(#(Int, String), Nil) {
+pub fn expect_mul_args(input: String) -> Result(#(Int, String), Nil) {
   use rest <- result.try(expect(input, "("))
   use #(arg1, rest) <- result.try(get_num(rest))
   use rest <- result.try(expect(rest, ","))
@@ -68,30 +68,38 @@ pub fn expect_args(input: String) -> Result(#(Int, String), Nil) {
   Ok(#(arg1 * arg2, rest))
 }
 
-pub fn get_next_mul(input: String) -> Result(#(Int, String), Nil) {
+pub type Instruction {
+  Mul(result: Int)
+  Do
+  Dont
+}
+
+pub fn get_next_instruction(
+  input: String,
+) -> Result(#(Instruction, String), Nil) {
   case input {
     "" -> Error(Nil)
 
     "mul" <> rest -> {
-      case expect_args(rest) {
-        Error(Nil) -> get_next_mul(rest)
-        ok -> ok
+      case expect_mul_args(rest) {
+        Error(Nil) -> get_next_instruction(rest)
+        Ok(#(result, rest)) -> Ok(#(Mul(result), rest))
       }
     }
 
-    _ -> get_next_mul(string.drop_start(input, 1))
+    _ -> get_next_instruction(string.drop_start(input, 1))
   }
 }
 
-fn get_muls_loop(input: String, acc: Int) -> Int {
-  case get_next_mul(input) {
-    Ok(#(i, rest)) -> get_muls_loop(rest, acc + i)
-    Error(Nil) -> acc
+fn get_instructions_loop(input: String, acc: Int) -> Int {
+  case get_next_instruction(input) {
+    Ok(#(Mul(i), rest)) -> get_instructions_loop(rest, acc + i)
+    Ok(#(Do, _)) | Ok(#(Dont, _)) | Error(Nil) -> acc
   }
 }
 
-pub fn get_muls(input: String) -> Int {
-  get_muls_loop(input, 0)
+pub fn get_instructions(input: String) -> Int {
+  get_instructions_loop(input, 0)
 }
 
 pub fn main() {
@@ -99,7 +107,7 @@ pub fn main() {
   let input = read_from_file(path)
 
   io.println("--- Part One ---")
-  io.debug(get_muls(input))
+  io.debug(get_instructions(input))
 
   io.println("")
 }

@@ -5,6 +5,18 @@ import gleam/result
 import gleam/string
 import simplifile
 
+pub type Instruction {
+  Mul(result: Int)
+  Do
+  Dont
+}
+
+type ParsedInstruction =
+  #(Instruction, String)
+
+type ParsedNum =
+  #(Int, String)
+
 fn get_path_from_arguments() -> String {
   case argv.load().arguments {
     [path] -> path
@@ -35,7 +47,7 @@ fn is_digit(char: String) -> Bool {
   }
 }
 
-fn get_num_loop(input: String, acc: String) -> Result(#(Int, String), Nil) {
+fn get_num_loop(input: String, acc: String) -> Result(ParsedNum, Nil) {
   let #(char, rest) =
     string.pop_grapheme(input)
     |> result.unwrap(#("", ""))
@@ -47,7 +59,7 @@ fn get_num_loop(input: String, acc: String) -> Result(#(Int, String), Nil) {
   }
 }
 
-pub fn get_num(input: String) -> Result(#(Int, String), Nil) {
+pub fn get_num(input: String) -> Result(ParsedNum, Nil) {
   get_num_loop(input, "")
 }
 
@@ -58,7 +70,7 @@ pub fn expect(input: String, expected: String) -> Result(String, Nil) {
   }
 }
 
-pub fn expect_mul_args(input: String) -> Result(#(Int, String), Nil) {
+pub fn expect_mul_args(input: String) -> Result(ParsedNum, Nil) {
   use rest <- result.try(expect(input, "("))
   use #(arg1, rest) <- result.try(get_num(rest))
   use rest <- result.try(expect(rest, ","))
@@ -68,22 +80,34 @@ pub fn expect_mul_args(input: String) -> Result(#(Int, String), Nil) {
   Ok(#(arg1 * arg2, rest))
 }
 
-pub type Instruction {
-  Mul(result: Int)
-  Do
-  Dont
+pub fn expect_empty_args(input: String) -> Result(String, Nil) {
+  use rest <- result.try(expect(input, "("))
+  use rest <- result.try(expect(rest, ")"))
+  Ok(rest)
 }
 
-pub fn get_next_instruction(
-  input: String,
-) -> Result(#(Instruction, String), Nil) {
+pub fn get_next_instruction(input: String) -> Result(ParsedInstruction, Nil) {
   case input {
     "" -> Error(Nil)
 
     "mul" <> rest -> {
       case expect_mul_args(rest) {
-        Error(Nil) -> get_next_instruction(rest)
         Ok(#(result, rest)) -> Ok(#(Mul(result), rest))
+        Error(Nil) -> get_next_instruction(rest)
+      }
+    }
+
+    "don't" <> rest -> {
+      case expect_empty_args(rest) {
+        Ok(rest) -> Ok(#(Dont, rest))
+        Error(Nil) -> get_next_instruction(rest)
+      }
+    }
+
+    "do" <> rest -> {
+      case expect_empty_args(rest) {
+        Ok(rest) -> Ok(#(Do, rest))
+        Error(Nil) -> get_next_instruction(rest)
       }
     }
 
@@ -91,15 +115,39 @@ pub fn get_next_instruction(
   }
 }
 
-fn get_instructions_loop(input: String, acc: Int) -> Int {
+fn get_instructions_no_enable_loop(input: String, acc: Int) -> Int {
   case get_next_instruction(input) {
-    Ok(#(Mul(i), rest)) -> get_instructions_loop(rest, acc + i)
-    Ok(#(Do, _)) | Ok(#(Dont, _)) | Error(Nil) -> acc
+    Ok(#(Mul(i), rest)) -> get_instructions_no_enable_loop(rest, acc + i)
+    Ok(#(Do, rest)) | Ok(#(Dont, rest)) ->
+      get_instructions_no_enable_loop(rest, acc)
+    Error(Nil) -> acc
+  }
+}
+
+pub fn get_instructions_no_enable(input: String) -> Int {
+  get_instructions_no_enable_loop(input, 0)
+}
+
+fn get_instructions_loop(input: String, acc: Int, enabled: Bool) -> Int {
+  case get_next_instruction(input) {
+    Ok(#(Mul(i), rest)) -> {
+      let acc = case enabled {
+        True -> acc + i
+        False -> acc
+      }
+
+      get_instructions_loop(rest, acc, enabled)
+    }
+
+    Ok(#(Do, rest)) -> get_instructions_loop(rest, acc, True)
+    Ok(#(Dont, rest)) -> get_instructions_loop(rest, acc, False)
+
+    Error(Nil) -> acc
   }
 }
 
 pub fn get_instructions(input: String) -> Int {
-  get_instructions_loop(input, 0)
+  get_instructions_loop(input, 0, True)
 }
 
 pub fn main() {
@@ -107,7 +155,10 @@ pub fn main() {
   let input = read_from_file(path)
 
   io.println("--- Part One ---")
-  io.debug(get_instructions(input))
+  io.debug(get_instructions_no_enable(input))
 
   io.println("")
+
+  io.println("--- Part Two ---")
+  io.debug(get_instructions(input))
 }

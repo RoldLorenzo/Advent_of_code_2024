@@ -45,13 +45,31 @@ pub fn get_next_instruction_test() {
   day_3.get_next_instruction("xmul(2,4)%&mul[3,7]!@^do_not_mul(5,5)")
   |> should.equal(Ok(#(day_3.Mul(8), "%&mul[3,7]!@^do_not_mul(5,5)")))
 
+  day_3.get_next_instruction(
+    "[3,7]!^don't()_mul(5,5)+mul(32,64](mul(11,8)undo()",
+  )
+  |> should.equal(Ok(#(day_3.Dont, "_mul(5,5)+mul(32,64](mul(11,8)undo()")))
+
+  day_3.get_next_instruction("undo()")
+  |> should.equal(Ok(#(day_3.Do, "")))
+
+  day_3.get_next_instruction("xmul(2,4)%&mul[3,7]!@^do_not_mul(5,5)")
+  |> should.equal(Ok(#(day_3.Mul(8), "%&mul[3,7]!@^do_not_mul(5,5)")))
+
   day_3.get_next_instruction("aaaaa")
   |> should.equal(Error(Nil))
 }
 
-pub fn get_muls_test() {
-  day_3.get_instructions(
+pub fn get_instructions_no_enable_test() {
+  day_3.get_instructions_no_enable(
     "xmul(2,4)%&mul[3,7]!@^do_not_mul(5,5)+mul(32,64]then(mul(11,8)mul(8,5))",
   )
   |> should.equal(161)
+}
+
+pub fn get_instructions_test() {
+  day_3.get_instructions(
+    "xmul(2,4)&mul[3,7]!^don't()_mul(5,5)+mul(32,64](mul(11,8)undo()?mul(8,5))",
+  )
+  |> should.equal(48)
 }

@@ -26,15 +26,11 @@ fn get_path_from_arguments() -> String {
 }
 
 fn read_from_file(file_name: String) -> String {
-  let result = simplifile.read(from: file_name)
-
-  case result {
-    Ok(contents) -> contents
-    Error(_) -> {
-      io.println("Unable to open file")
-      panic
-    }
-  }
+  simplifile.read(from: file_name)
+  |> result.lazy_unwrap(fn() {
+    io.println("Unable to open file")
+    panic
+  })
 }
 
 fn is_digit(char: String) -> Bool {

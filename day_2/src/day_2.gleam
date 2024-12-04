@@ -2,6 +2,7 @@ import argv
 import gleam/int
 import gleam/io
 import gleam/list
+import gleam/result
 import gleam/string
 import simplifile
 
@@ -17,15 +18,12 @@ fn get_path_from_arguments() -> String {
 }
 
 fn read_from_file(file_name: String) -> List(String) {
-  let result = simplifile.read(from: file_name)
-
-  let contents = case result {
-    Ok(contents) -> contents
-    Error(_) -> {
+  let contents =
+    simplifile.read(from: file_name)
+    |> result.lazy_unwrap(fn() {
       io.println("Unable to open file")
       panic
-    }
-  }
+    })
 
   string.split(contents, on: "\r\n")
 }

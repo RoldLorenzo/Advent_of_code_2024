@@ -11,11 +11,8 @@ pub type Instruction {
   Dont
 }
 
-type ParsedInstruction =
-  #(Instruction, String)
-
-type ParsedNum =
-  #(Int, String)
+type Parsed(any) =
+  #(any, String)
 
 fn get_path_from_arguments() -> String {
   case argv.load().arguments {
@@ -47,7 +44,7 @@ fn is_digit(char: String) -> Bool {
   }
 }
 
-fn get_num_loop(input: String, acc: String) -> Result(ParsedNum, Nil) {
+fn get_num_loop(input: String, acc: String) -> Result(Parsed(Int), Nil) {
   let #(char, rest) =
     string.pop_grapheme(input)
     |> result.unwrap(#("", ""))
@@ -59,7 +56,7 @@ fn get_num_loop(input: String, acc: String) -> Result(ParsedNum, Nil) {
   }
 }
 
-pub fn get_num(input: String) -> Result(ParsedNum, Nil) {
+pub fn get_num(input: String) -> Result(Parsed(Int), Nil) {
   get_num_loop(input, "")
 }
 
@@ -70,7 +67,7 @@ pub fn expect(input: String, expected: String) -> Result(String, Nil) {
   }
 }
 
-pub fn expect_mul_args(input: String) -> Result(ParsedNum, Nil) {
+pub fn expect_mul_args(input: String) -> Result(Parsed(Int), Nil) {
   use rest <- result.try(expect(input, "("))
   use #(arg1, rest) <- result.try(get_num(rest))
   use rest <- result.try(expect(rest, ","))
@@ -86,7 +83,7 @@ pub fn expect_empty_args(input: String) -> Result(String, Nil) {
   Ok(rest)
 }
 
-pub fn get_next_instruction(input: String) -> Result(ParsedInstruction, Nil) {
+pub fn get_next_instruction(input: String) -> Result(Parsed(Instruction), Nil) {
   case input {
     "" -> Error(Nil)
 

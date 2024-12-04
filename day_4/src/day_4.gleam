@@ -19,7 +19,10 @@ fn get_path_from_arguments() -> String {
   }
 }
 
-fn read_from_file(file_name: String) -> Array(Array(String)) {
+type Matrix(any) =
+  Array(Array(any))
+
+fn read_from_file(file_name: String) -> Matrix(String) {
   let contents =
     simplifile.read(from: file_name)
     |> result.lazy_unwrap(fn() {
@@ -34,7 +37,7 @@ fn read_from_file(file_name: String) -> Array(Array(String)) {
 }
 
 fn get_from_matrix(
-  input: Array(Array(String)),
+  input: Matrix(String),
   line_index: Int,
   col_index: Int,
 ) -> String {
@@ -45,7 +48,7 @@ fn get_from_matrix(
 }
 
 pub fn get_horizontal_word(
-  input: Array(Array(String)),
+  input: Matrix(String),
   line_index: Int,
   col_index: Int,
 ) -> String {
@@ -56,7 +59,7 @@ pub fn get_horizontal_word(
 }
 
 pub fn get_vertical_word(
-  input: Array(Array(String)),
+  input: Matrix(String),
   line_index: Int,
   col_index: Int,
 ) -> String {
@@ -67,7 +70,7 @@ pub fn get_vertical_word(
 }
 
 pub fn get_left_diagonal_word(
-  input: Array(Array(String)),
+  input: Matrix(String),
   line_index: Int,
   col_index: Int,
 ) -> String {
@@ -78,7 +81,7 @@ pub fn get_left_diagonal_word(
 }
 
 pub fn get_right_diagonal_word(
-  input: Array(Array(String)),
+  input: Matrix(String),
   line_index: Int,
   col_index: Int,
 ) -> String {
@@ -92,7 +95,7 @@ type GetWordFn =
   fn(Array(Array(String)), Int, Int) -> String
 
 pub fn is_xmas(
-  input: Array(Array(String)),
+  input: Matrix(String),
   line_index: Int,
   col_index: Int,
   get_word: GetWordFn,
@@ -105,11 +108,7 @@ fn is_mas(word: String) -> Bool {
   word == "MAS" || word == "SAM"
 }
 
-pub fn is_x_mas(
-  input: Array(Array(String)),
-  line_index: Int,
-  col_index: Int,
-) -> Int {
+pub fn is_x_mas(input: Matrix(String), line_index: Int, col_index: Int) -> Int {
   let right_diagonal =
     get_from_matrix(input, line_index - 1, col_index - 1)
     <> get_from_matrix(input, line_index, col_index)
@@ -125,7 +124,7 @@ pub fn is_x_mas(
 }
 
 fn update_indexes(
-  input: Array(Array(String)),
+  input: Matrix(String),
   line_index: Int,
   col_index: Int,
 ) -> Option(#(Int, Int)) {
@@ -146,7 +145,7 @@ fn update_indexes(
 }
 
 fn count_xmases_loop(
-  input: Array(Array(String)),
+  input: Matrix(String),
   line_index: Int,
   col_index: Int,
   acc: Int,
@@ -166,12 +165,12 @@ fn count_xmases_loop(
   }
 }
 
-pub fn count_xmases(input: Array(Array(String))) -> Int {
+pub fn count_xmases(input: Matrix(String)) -> Int {
   count_xmases_loop(input, 0, 0, 0)
 }
 
 fn count_x_mases_loop(
-  input: Array(Array(String)),
+  input: Matrix(String),
   line_index: Int,
   col_index: Int,
   acc: Int,
@@ -186,7 +185,7 @@ fn count_x_mases_loop(
   }
 }
 
-pub fn count_x_mases(input: Array(Array(String))) -> Int {
+pub fn count_x_mases(input: Matrix(String)) -> Int {
   count_x_mases_loop(input, 0, 0, 0)
 }
 
